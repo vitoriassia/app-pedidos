@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:pedidos_app/build_config.dart';
+import 'package:pedidos_app/features/oauth/view/auth_view.dart';
+import 'package:pedidos_app/features/oauth/viewmodel/auth_viewmodel.dart';
 import 'package:pedidos_app/features/orders/view/orders_view.dart';
 import 'package:pedidos_app/features/orders/viewmodel/order_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:pedidos_app/core/di/inject.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
+  BuildConfig.main();
   setupDependencies();
+
   runApp(const MyApp());
 }
 
@@ -14,12 +21,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<OrderViewModel>(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => getIt<OrderViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<AuthViewModel>()),
+      ],
       child: MaterialApp(
-        title: 'Pedidos',
+        navigatorKey: navigatorKey,
+        title: 'Orders',
         theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-        home: OrdersView(),
+        initialRoute: '/auth',
+        routes: {'/auth': (_) => const AuthView(), '/orders': (_) => const OrdersView()},
       ),
     );
   }
