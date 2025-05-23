@@ -21,7 +21,7 @@ class _AuthViewState extends State<AuthView> {
   void _verfiySession() async {
     final result = await context.read<AuthViewModel>().checkSession();
 
-    if (result is SuccessState) {
+    if (result is SuccessState<bool> && result.data) {
       _navigateToOrder();
     }
   }

@@ -4,6 +4,11 @@ import 'package:pedidos_app/core/network/api_client.dart';
 class DioHttpClient implements ApiClient {
   final Dio _dio;
 
+  @override
+  Future<dynamic> get(String path, {Map<String, dynamic>? queryParams, dynamic options}) {
+    return _dio.get(path, queryParameters: queryParams, options: options);
+  }
+
   DioHttpClient({required Dio dio, List<Interceptor>? interceptors}) : _dio = dio {
     if (interceptors != null) {
       _dio.interceptors.addAll(interceptors);

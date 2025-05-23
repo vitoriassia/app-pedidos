@@ -1,43 +1,39 @@
+import 'package:pedidos_app/core/network/api_client.dart';
 import 'package:pedidos_app/core/state/ui_state.dart';
 import 'package:pedidos_app/features/orders/model/create_order_model.dart';
 import 'package:pedidos_app/features/orders/model/order_model.dart';
 import 'order_repository.dart';
+import 'package:pedidos_app/core/state/repository_handler.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
-  @override
-  Future<UiState> fetchOrders() async {
-    await Future.delayed(const Duration(seconds: 1));
+  final ApiClient _apiService;
 
-    final mockPedidos = List.generate(3, (index) {
-      return OrderModel(
-        id: 'id-$index',
-        createdAt: DateTime.now().subtract(Duration(days: index)),
-        description: 'Pedido de teste $index',
-        customerName: 'Cliente $index',
-        finished: index % 2 == 0,
-      );
+  OrderRepositoryImpl(this._apiService);
+
+  @override
+  Future<UiState> fetchOrders() {
+    return repositoryHandler<List<OrderModel>>(() async {
+      final response = await _apiService.get('/orders');
+
+      final dataList = (response.data as List?) ?? [];
+
+      return dataList.map((json) => OrderModel.fromJson(json)).toList();
     });
-
-    return SuccessState(mockPedidos);
   }
 
   @override
-  Future<UiState> createOrder(CreateOrderModel createOrder) async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<UiState> createOrder(CreateOrderModel createOrder) {
+    return repositoryHandler<OrderModel>(() async {
+      final response = await _apiService.post('/orders', body: createOrder.toJson());
 
-    OrderModel order = OrderModel(
-      id: 'id-${DateTime.now().millisecondsSinceEpoch}',
-      createdAt: DateTime.now(),
-      description: createOrder.description,
-      customerName: createOrder.customerName,
-      finished: false,
-    );
-    return SuccessState(order);
+      return OrderModel.fromJson(response.data);
+    });
   }
 
   @override
-  Future<UiState> finalizeOrder(String orderId) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return SuccessState(null);
+  Future<UiState> finalizeOrder(String orderId) {
+    return repositoryHandler<void>(() async {
+      await _apiService.put('/orders/$orderId/finish');
+    });
   }
 }

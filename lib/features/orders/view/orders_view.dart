@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pedidos_app/core/helpers/snackbar_helper.dart';
 import 'package:pedidos_app/features/orders/view/widgets/list_orders_widget.dart';
 import 'package:pedidos_app/shared/widgets/ui_state_builder.dart';
 import 'package:provider/provider.dart';
@@ -22,14 +23,21 @@ class _OrdersViewState extends State<OrdersView> {
     _viewModel = context.read();
 
     super.initState();
-    Future.microtask(() => _getPedidos());
+    Future.microtask(() => _getOrders());
   }
 
-  Future<void> _getPedidos() => _viewModel.getPedidos();
+  Future<void> _getOrders() => _viewModel.getOrders();
 
   Future<void> _finalizeOrder(String orderId) async {
-    await _viewModel.finalizeOrder(orderId);
-    await _getPedidos();
+    final result = await _viewModel.finalizeOrder(orderId);
+    if (result is SuccessState) {
+      SnackbarHelper.showSuccess('Order finalized successfully');
+    } else if (result is FailureState) {
+      final message = result.message;
+      SnackbarHelper.showError(message);
+    }
+
+    await _getOrders();
   }
 
   void _onPressedAdd() {
@@ -46,18 +54,21 @@ class _OrdersViewState extends State<OrdersView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pedidos')),
+      appBar: AppBar(title: const Text('Orders')),
       body: Selector<OrderViewModel, UiState>(
         selector: (_, viewModel) => viewModel.uiState,
         builder: (context, state, _) {
           return UiStateBuilder<List<OrderModel>>(
             state: state,
             onSuccess: (orders) {
-              if (orders.isEmpty) {
-                return const Center(child: Text('Nenhum pedido encontrado'));
+              if (_viewModel.orders.isEmpty) {
+                return const Center(child: Text('No orders found'));
               }
 
-              return ListOrdersWidget(orders: orders, onFinishPressed: _finalizeOrder);
+              return ListOrdersWidget(
+                orders: _viewModel.orders,
+                onFinishPressed: _finalizeOrder,
+              );
             },
           );
         },
@@ -67,7 +78,7 @@ class _OrdersViewState extends State<OrdersView> {
         children: [
           FloatingActionButton(
             heroTag: 'refresh',
-            onPressed: _getPedidos,
+            onPressed: _getOrders,
             child: const Icon(Icons.refresh),
           ),
           const SizedBox(height: 8),

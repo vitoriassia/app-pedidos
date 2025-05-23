@@ -50,10 +50,13 @@ class AuthViewModel extends ChangeNotifier {
   Future<UiState> checkSession() async {
     _setCheckSessionState(LoadingState());
     final result = await _repository.checkSession();
+    _setCheckSessionState(result);
 
     if (result is SuccessState<bool> && result.data) {
       _isAuthenticated = true;
-      _setCheckSessionState(result);
+      addAuthInterceptor();
+    } else {
+      _isAuthenticated = false;
     }
 
     return result;

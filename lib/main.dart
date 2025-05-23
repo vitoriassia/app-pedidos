@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:pedidos_app/core/di/inject.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() {
   BuildConfig.main();
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
+        scaffoldMessengerKey: scaffoldMessengerKey,
         title: 'Orders',
         theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
         initialRoute: '/auth',

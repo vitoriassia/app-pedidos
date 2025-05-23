@@ -31,10 +31,12 @@ void setupDependencies() {
   );
 
   // API
-  getIt.registerLazySingleton<DioHttpClient>(() => DioHttpClient(dio: getIt()));
+  getIt.registerLazySingleton<DioHttpClient>(() => DioHttpClient(dio: getIt<Dio>()));
 
   // Repository
-  getIt.registerLazySingleton<OrderRepository>(() => OrderRepositoryImpl());
+  getIt.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(getIt<DioHttpClient>()),
+  );
   getIt.registerLazySingleton<OAuthRepository>(
     () => OAuthRepositoryImpl(getIt<DioHttpClient>(), getIt<TokenStorage>()),
   );

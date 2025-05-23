@@ -21,22 +21,21 @@ class OrderViewModel extends ChangeNotifier {
 
   OrderViewModel(this._repository);
 
-  Future<void> getPedidos() async {
+  Future<void> getOrders() async {
     _setUiState(LoadingState());
 
     final result = await _repository.fetchOrders();
-    _uiState = result;
 
     if (result is SuccessState<List<OrderModel>>) {
       _orders = result.data;
     }
 
+    _uiState = result;
+
     notifyListeners();
   }
 
   Future<UiState> createOrder(CreateOrderModel order) async {
-    _setUiState(LoadingState());
-
     final result = await _repository.createOrder(order);
 
     if (result is SuccessState<OrderModel>) {
@@ -44,6 +43,7 @@ class OrderViewModel extends ChangeNotifier {
     }
 
     _setUiState(SuccessState(_orders));
+
     notifyListeners();
     return result;
   }

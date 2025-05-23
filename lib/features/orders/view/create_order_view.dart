@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pedidos_app/core/helpers/snackbar_helper.dart';
 import 'package:pedidos_app/core/state/ui_state.dart';
 import 'package:pedidos_app/features/orders/model/create_order_model.dart';
 import 'package:pedidos_app/shared/widgets/app_textfield.dart';
@@ -17,14 +18,14 @@ class _CreateOrderViewState extends State<CreateOrderView> {
   final _formKey = GlobalKey<FormState>();
   final _customerController = TextEditingController();
   final _productController = TextEditingController();
-  final _quantityController = TextEditingController();
+
   UiState _submitState = InitialState();
 
   @override
   void dispose() {
     _customerController.dispose();
     _productController.dispose();
-    _quantityController.dispose();
+
     super.dispose();
   }
 
@@ -43,8 +44,21 @@ class _CreateOrderViewState extends State<CreateOrderView> {
     setState(() => _submitState = result);
 
     if (result is SuccessState) {
+      _showSuccess();
       _navigatePop();
+    } else if (result is FailureState) {
+      _navigatePop();
+      _showError(result.message);
     }
+  }
+
+  void _showSuccess() {
+    SnackbarHelper.showSuccess('Order created successfully');
+  }
+
+  /// Shows an error message as a SnackBar with a red background.
+  void _showError(String message) {
+    SnackbarHelper.showError(message);
   }
 
   void _navigatePop() {
@@ -80,18 +94,7 @@ class _CreateOrderViewState extends State<CreateOrderView> {
                       const SizedBox(height: 16),
                       AppTextField(controller: _productController, label: 'Product'),
                       const SizedBox(height: 16),
-                      AppTextField(
-                        controller: _quantityController,
-                        label: 'Quantity',
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Enter quantity';
-                          final n = int.tryParse(value);
-                          if (n == null || n <= 0) return 'Enter a valid quantity';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
